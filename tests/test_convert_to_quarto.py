@@ -1,8 +1,29 @@
-from TexSoup import TexSoup
-from convert_to_quarto import *
+from pathlib import Path
 
-def test_parse_include_graphics():
-    tex = r"""\includegraphics[width=.8\textwidth]{figures/lego_1}"""
+import pytest
+
+from TexSoup import TexSoup
+from beamer2qmd.convert_to_quarto import *
+
+
+@pytest.fixture
+def tmp_wrkdir(tmp_path):
+  orig = os.getcwd()
+  os.chdir(tmp_path)
+  yield
+  os.chdir(orig)
+
+
+@pytest.fixture
+def figure_png(tmp_wrkdir):
+    dir = Path("figures")
+    dir.mkdir()
+    fig = dir / "figure.png"
+    fig.write_text("")
+    yield fig.with_suffix("")
+
+def test_parse_include_graphics(figure_png):
+    tex = r"""\includegraphics[width=.8\textwidth]{""" + f'{figure_png}' + r"}"
     soup = TexSoup(tex)
     parse_include_graphics(list(soup.children)[0])
 
@@ -30,7 +51,7 @@ def test_parse_slide_notes_only():
 """
     assert parse_slide(list(soup.children)[0]).to_md() == expect
 
-def test_parse_slide_single_figure():
+def test_parse_slide_single_figure(figure_png):
     tex = r"""
     \begin{frame}
   \frametitle{First Models}
@@ -41,14 +62,14 @@ def test_parse_slide_single_figure():
   \note[item]{The answer is we made it up!  and we just want to build
     something simple to understand how the bricks fit together}
   \centering 
-  \includegraphics[width=.8\textwidth]{figures/legos_3} \\ 
+  \includegraphics[width=.8\textwidth]{figures/figure} \\ 
   \footnotesize Image: Hans Schou (CC BY-SA 3.0)
 \end{frame}
     """
     soup = TexSoup(tex)
     expect = """## First Models
 
-![](figures/legos_3.jpg)
+![](figures/figure.png)
 
 
  Image: Hans Schou (CC BY-SA 3.0)
