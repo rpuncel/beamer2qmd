@@ -22,5 +22,5 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.isort]
+src_paths = ["src", "test"]
 profile = "black"
-src_paths=src,test
