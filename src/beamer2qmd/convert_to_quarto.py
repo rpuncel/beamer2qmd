@@ -148,42 +148,6 @@ def parse_block(root):
     return Block(title, contents)
 
 
-@dataclass
-class Column:
-    
-    width: float | None
-    contents: str
-    skip: int = 0
-
-    def to_md(self):
-        width_specifier = f'width="{self.width:g}%"' if self.width is not None else ""
-        lines = []
-        lines.append(f'::: {{.column {width_specifier}}}\n')
-        for line in self.contents[self.skip:]:
-            lines.append(str(line).rstrip().replace(r"\\", "\n"))
-        lines.append('\n:::\n')
-        return ''.join(lines)
-
-
-    def __str__(self):
-        return self.to_md()
-
-
-@dataclass
-class Columns:
-    columns: list[Column]
-
-    def to_md(self):
-        content = "\n".join(c.to_md() for c in self.columns)
-        return "\n".join([
-            ":::: {.columns}\n",
-            content,
-            "::::"
-
-        ])
-
-    def __str__(self):
-        return self.to_md()
 
 
 def parse_columns(root):
