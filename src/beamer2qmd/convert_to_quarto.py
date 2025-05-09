@@ -1,12 +1,14 @@
-from dataclasses import dataclass
 import os
+from dataclasses import dataclass
 from typing import TypedDict
+
 import yaml
 from TexSoup import TexSoup
-from TexSoup.data import TexNode, TexCmd, TexExpr
+from TexSoup.data import TexCmd, TexExpr, TexNode
+
+from beamer2qmd.parse import *
 
 from .nodes import *
-from beamer2qmd.parse import *
 
 # Define the input and output file paths
 input_file = "/Users/rpuncel/Workspaces/slides/unit_01/unit_01.tex"

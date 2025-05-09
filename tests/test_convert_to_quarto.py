@@ -1,8 +1,8 @@
 from pathlib import Path
 
 import pytest
-
 from TexSoup import TexSoup
+
 from beamer2qmd.convert_to_quarto import *
 
 
