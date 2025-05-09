@@ -2,18 +2,13 @@
 name = "beamer2qmd"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "Rob Puncel",email = "rpuncel@gmail.com"}
-]
+authors = [{ name = "Rob Puncel", email = "rpuncel@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = [
-    "pyyaml (>=6.0.2,<7.0.0)",
-    "texsoup (>=0.3.1,<0.4.0)"
-]
+dependencies = ["pyyaml (>=6.0.2,<7.0.0)", "texsoup (>=0.3.1,<0.4.0)"]
 
 [tool.poetry]
-packages = [{include = "beamer2qmd", from = "src"}]
+packages = [{ include = "beamer2qmd", from = "src" }]
 
 
 [tool.poetry.group.dev.dependencies]
@@ -25,3 +20,6 @@ isort = "^6.0.1"
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
