@@ -5,6 +5,8 @@ import yaml
 from TexSoup import TexSoup
 from TexSoup.data import TexNode, TexCmd, TexExpr
 
+from .nodes import *
+
 # Define the input and output file paths
 input_file = '/Users/rpuncel/Workspaces/slides/unit_01/unit_01.tex'
 output_file = '/Users/rpuncel/Workspaces/slides/unit_01/unit_01_converted.qmd'
@@ -26,37 +28,6 @@ def get_doc_metadata(doc):
         institute = str(doc.institute.string),
         format = {"revealjs": {"show-notes": True}}
     )
-
-class Notes:
-    def __init__(self, items: list):
-        self.items = items
-
-    def to_md(self):
-        if len(self.items) == 0:
-            return ''
-        bullets = [f'- {item}' for item in self.items]
-
-        return '\n'.join([
-            '::: {.notes}',
-            *bullets,
-            ':::',
-            ''
-        ])
-
-class Slide:
-
-    def __init__(self, title: str, contents, notes: Notes):
-        self.title = title
-        self.contents = contents
-        self.notes = notes
-    
-    def to_md(self):
-        return ('\n'.join([
-            f'## {self.title}',
-            '\n'.join([str(x) for x in self.contents]),
-            '',
-            self.notes.to_md(),  
-        ]))
 
 class Section:
     
