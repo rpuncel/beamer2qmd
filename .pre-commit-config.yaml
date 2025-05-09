@@ -20,3 +20,9 @@ repos:
         language: system
         types: [file, python]
         files: "^(src|test)/"
+      - id: pytest
+        name: pytest
+        entry: poetry run pytest
+        language: system
+        type: [python]
+        pass_filenames: false
