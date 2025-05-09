@@ -1,6 +1,7 @@
 from TexSoup import TexSoup
 from beamer2qmd.parse import *
 
+
 def test_parse_block():
     text = r"""\begin{block}{Definition 1.1.12: \textit{partition}}
     A set of sets $A_{1}, A_{2}, \dots, A_{n}$ is a \textit{partition} of set $S$, if $A_{1}, A_{2}, \dots, A_{n}$ are nonempty and
