@@ -6,6 +6,7 @@ from TexSoup import TexSoup
 from TexSoup.data import TexNode, TexCmd, TexExpr
 
 from .nodes import *
+from beamer2qmd.parse import *
 
 # Define the input and output file paths
 input_file = '/Users/rpuncel/Workspaces/slides/unit_01/unit_01.tex'
@@ -146,24 +147,6 @@ def parse_block(root):
 
 
     return Block(title, contents)
-
-
-
-
-def parse_columns(root):
-    columns: list[Column] = []
-    for child in root.children:
-        assert child.name == "column"
-        idx = child.args[0].string.find("\\textwidth")
-        skip = 0
-        if idx != -1:
-            width_str = child.args[0].string[:idx]
-            width = float(width_str)
-            width_pct = width * 100
-            skip = 2
-        columns.append(Column(width_pct, child.contents, skip))
-    return Columns(columns)
-
 
 def parse_texnode(root):
     if root.name == 'itemize':
