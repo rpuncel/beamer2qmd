@@ -1,13 +1,19 @@
 fail_fast: true
 repos:
+  - repo: https://github.com/python-poetry/poetry
+    rev: "84eeadc21f92a04d46ea769e3e39d7c902e44136"
+    hooks:
+      - id: poetry-check
+      - id: poetry-lock
+      - id: poetry-install
   - repo: local
     hooks:
       - id: black
         name: black
         entry: poetry run black
         language: system
-        types: [file, python]
-        files: "^(src/|test/|pyproject.toml)"
+        types_or: [python, toml]
+        files: "^(src|test)/"
       - id: isort
         name: isort
         entry: poetry run isort
