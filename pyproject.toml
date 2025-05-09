@@ -8,11 +8,17 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "pyyaml (>=6.0.2,<7.0.0)",
+    "texsoup (>=0.3.1,<0.4.0)"
 ]
 
 [tool.poetry]
 packages = [{include = "beamer2qmd", from = "src"}]
 
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+types-pyyaml = "^6.0.12.20250402"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
