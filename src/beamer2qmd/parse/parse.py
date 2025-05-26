@@ -66,7 +66,7 @@ def parse_texnode(root):
         return root
     elif root.name in ["$", "$$", "\\"]:
         return root
-    elif root.name == "centering":
+    elif root.name == "center":
         return parse_centering(root)
     elif root.name in ["footnotesize"]:
         return ""

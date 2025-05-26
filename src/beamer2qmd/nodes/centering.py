@@ -13,3 +13,6 @@ class Centering:
         for line in self.contents:
             lines.append(str(line).rstrip().replace(r"\\", "\n"))
         return "".join(lines)
+
+    def __str__(self):
+        return self.to_md()

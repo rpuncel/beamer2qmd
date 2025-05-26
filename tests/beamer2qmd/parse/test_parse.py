@@ -4,7 +4,6 @@ import pytest
 from beamer2qmd.parse import *
 
 
-@pytest.mark.xfail
 def test_parse_block():
     text = r"""\begin{block}{Definition 1.1.12: \textit{partition}}
     A set of sets $A_{1}, A_{2}, \dots, A_{n}$ is a \textit{partition} of set $S$, if $A_{1}, A_{2}, \dots, A_{n}$ are nonempty and
@@ -25,8 +24,7 @@ pairwise disjoint, and if $S = A_{1} \cup A_{2}
     assert parsed.to_md() == expect
 
 
-@pytest.mark.xfail
-def test_parse_columns():
+def test_parse_columns(figure_png):
     text = r"""
       \begin{columns}
     \begin{column}{0.6\textwidth}
@@ -38,7 +36,7 @@ def test_parse_columns():
     \end{column}
     \begin{column}{0.4\textwidth}
       \begin{center}
-        \includegraphics[width=\textwidth]{figures/Laplace}
+        \includegraphics[width=\textwidth]{figures/figure}
       \end{center}
     \end{column}
   \end{columns}
@@ -58,6 +56,8 @@ def test_parse_columns():
 :::
 
 ::: {.column width="40%"}
+![](figures/figure.png)
+:::
 
 ::::\
 """
