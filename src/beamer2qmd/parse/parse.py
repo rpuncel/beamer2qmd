@@ -1,6 +1,7 @@
 from TexSoup import TexNode
 
 from beamer2qmd.nodes import *
+from beamer2qmd.nodes.centering import Centering
 from beamer2qmd.util.util import find_image_file
 
 
@@ -37,6 +38,16 @@ def parse_simple(root):
     return contents
 
 
+def parse_centering(root):
+    contents = list()
+    for i, content in enumerate(root.contents):
+        if isinstance(content, str):
+            contents.append(content)
+        else:
+            contents.append(parse_texnode(content))
+    return Centering(contents)
+
+
 def parse_texnode(root):
     if root.name == "itemize":
         return UnorderedList(parse_list(root))
@@ -53,7 +64,11 @@ def parse_texnode(root):
         return parse_columns(root)
     elif root.name in ["$", "$$", "\\"]:
         return root
-    elif root.name in ["centering", "footnotesize"]:
+    elif root.name in ["$", "$$", "\\"]:
+        return root
+    elif root.name == "centering":
+        return parse_centering(root)
+    elif root.name in ["footnotesize"]:
         return ""
 
     else:
