@@ -62,9 +62,9 @@ def parse_texnode(root):
         return parse_block(root)
     elif root.name == "columns":
         return parse_columns(root)
-    elif root.name in ["$", "$$", "\\"]:
-        return root
-    elif root.name in ["$", "$$", "\\"]:
+    elif root.name in ["$", "$$"]:
+        return str(root)
+    elif root.name in ["\\"]:
         return root
     elif root.name == "center":
         return parse_centering(root)

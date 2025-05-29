@@ -4,11 +4,11 @@ class Block:
         self.content = content
 
     def to_md(self):
-        content = [str(c).lstrip() for c in self.content]
+        content = [str(c) for c in self.content]
         return "\n".join(
             [
                 f'::: {{.callout-note title="{self.title}"}}',
-                "\n".join(content),
+                "".join(content),
                 ":::",
             ]
         )
