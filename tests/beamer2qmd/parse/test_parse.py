@@ -1,7 +1,16 @@
 from TexSoup import TexSoup
 import pytest
 
-from beamer2qmd.parse import *
+from beamer2qmd.parse.parse import parse
+
+
+def test_parsing_math_eliminates_whitespace_inside_delimiters():
+    text = r"$ ( A \cap B ) $"
+    expect = r"$( A \cap B )$"
+    soup = TexSoup(text)
+    contents = list(soup.contents)[0]
+    parsed = parse(contents)
+    assert expect == parsed
 
 
 def test_parse_block():
@@ -12,16 +21,15 @@ def test_parse_block():
 
   \end{block}
     """
-    expect = """::: {.callout-note title="Definition 1.1.12:  _partition_ "}
+    expect = """::: {.callout-note title="Definition 1.1.12:  _partition_"}
 
     A set of sets $A_{1}, A_{2}, \dots, A_{n}$ is a _partition_ of set $S$, if $A_{1}, A_{2}, \dots, A_{n}$ are nonempty and
-    pairwise disjoint, and if $S = A_{1} \cup A_{2} 
-    \cup \cdots \cup A_{n}$.
+    pairwise disjoint, and if $S = A_{1} \cup A_{2} \cup \cdots \cup A_{n}$.
 
   
 :::"""
     soup = TexSoup(text)
-    parsed = parse_block(list(soup.children)[0])
+    parsed = parse(list(soup.children)[0])
     assert parsed.to_md() == expect
 
 
@@ -63,5 +71,19 @@ def test_parse_columns(figure_png):
 ::::\
 """
     soup = TexSoup(text)
-    parsed = parse_columns(list(soup.children)[0])
+    parsed = parse(list(soup.children)[0])
+    assert parsed.to_md() == expect
+
+
+def test_parse_enumerate():
+    text = r"""\begin{enumerate}
+\item Putting together statistical models
+\item Fitting models to data
+\end{enumerate}"""
+    expect = r"""1. Putting together statistical models
+2. Fitting models to data
+"""
+
+    soup = TexSoup(text)
+    parsed = parse(list(soup.children)[0])
     assert parsed.to_md() == expect

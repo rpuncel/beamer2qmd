@@ -7,6 +7,9 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = ["pyyaml (>=6.0.2,<7.0.0)", "texsoup (>=0.3.1,<0.4.0)"]
 
+[project.scripts]
+b2q = 'beamer2qmd.convert_to_quarto:main'
+
 [tool.poetry]
 packages = [{ include = "beamer2qmd", from = "src" }]
 

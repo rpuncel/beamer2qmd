@@ -16,7 +16,7 @@ class OrderedList:
         self.items = items
 
     def to_md(self):
-        return "\n".join([f"{i+1}. {item}" for i, item in enumerate(self.items)])
+        return "".join([f"{i+1}. {item.lstrip()}" for i, item in enumerate(self.items)])
 
     def __str__(self):
         return self.to_md()

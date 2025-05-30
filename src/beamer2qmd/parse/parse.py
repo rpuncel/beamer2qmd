@@ -11,7 +11,7 @@ def parse_list(root):
         if child.name == "itemize":
             result.append(UnorderedList(parse_list(child)))
         elif child.name == "item":
-            result.append("".join([text for text in child.text]))
+            result.append("".join([parse(text) for text in child.text]))
     return result
 
 
@@ -23,16 +23,41 @@ def parse_include_graphics(root):
     return Image(path)
 
 
+def parse_math(root):
+    content_str = ""
+    contents = list(root.contents)
+    for i, x in enumerate(contents):
+        to_add = str(x)
+        if i == 0:
+            to_add = to_add.lstrip()
+        if i == len(contents) - 1:
+            to_add = to_add.rstrip()
+        if i + 1 < len(contents):
+            if isinstance(contents[i], TexNode) and isinstance(
+                contents[i + 1], TexNode
+            ):
+                to_add += " "
+        content_str += to_add
+
+    return "".join(
+        [
+            "$",
+            content_str,
+            "$",
+        ]
+    )
+
+
 def parse_simple(root):
     contents = list()
     for child in root.contents:
         if hasattr(child, "name"):
             if child.name == "textit":
                 contents.append(f"_{str(child.args[0].string)}_")
-            if child.name == "$":
+            elif child.name == "$":
                 contents.append(child.string)
             else:
-                contents.append(child.string)
+                contents.append(str(child))
         else:
             contents.append(child)
     return contents
@@ -63,7 +88,7 @@ def parse_texnode(root):
     elif root.name == "columns":
         return parse_columns(root)
     elif root.name in ["$", "$$"]:
-        return str(root)
+        return parse_math(root)
     elif root.name in ["\\"]:
         return root
     elif root.name == "center":
@@ -143,3 +168,10 @@ def parse_slide(frame_root):
                 contents.append(str(child))
 
     return Slide(title=slide_title, contents=contents, notes=Notes(note_items))
+
+
+def parse(root):
+    if hasattr(root, "name"):
+        return parse_texnode(root)
+    else:
+        return root
