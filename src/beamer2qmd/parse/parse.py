@@ -11,7 +11,7 @@ def parse_list(root):
         if child.name == "itemize":
             result.append(UnorderedList(parse_list(child)))
         elif child.name == "item":
-            result.append("".join([parse(text) for text in child.text]))
+            result.append("".join([parse(text).rstrip() for text in child.text]))
     return result
 
 
