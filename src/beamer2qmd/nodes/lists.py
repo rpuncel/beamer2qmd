@@ -4,7 +4,7 @@ class UnorderedList:
         self.items = items
 
     def to_md(self):
-        return "\n".join([f"- {item}" for item in self.items])
+        return "".join([f"- {item.lstrip()}" for item in self.items])
 
     def __str__(self):
         return self.to_md()

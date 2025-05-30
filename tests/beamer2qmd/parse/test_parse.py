@@ -87,3 +87,18 @@ def test_parse_enumerate():
     soup = TexSoup(text)
     parsed = parse(list(soup.children)[0])
     assert parsed.to_md() == expect
+
+
+def test_parse_itemize():
+
+    text = r"""\begin{itemize}
+\item  A precise definition of probability
+\item  How mathematicians build from a set of axioms to useful properties
+\end{itemize}"""
+    expect = r"""- A precise definition of probability
+- How mathematicians build from a set of axioms to useful properties
+"""
+
+    soup = TexSoup(text)
+    parsed = parse(list(soup.children)[0])
+    assert parsed.to_md() == expect
