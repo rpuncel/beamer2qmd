@@ -5,7 +5,7 @@ class Image:
         self.path = path
 
     def to_md(self):
-        return f"![{self.caption}]({self.path})\n"
+        return f"![{self.caption}]({self.path})"
 
     def __str__(self):
         return self.to_md()

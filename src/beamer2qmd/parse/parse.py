@@ -1,17 +1,31 @@
+from typing import Iterator
+
 from TexSoup import TexNode
+from TexSoup.data import BracketGroup, TexCmd, TexEnv
 
 from beamer2qmd.nodes import *
 from beamer2qmd.nodes.centering import Centering
+from beamer2qmd.nodes.node import Node
 from beamer2qmd.util.util import find_image_file
 
 
-def parse_list(root):
-    result = list()
+def _parse_item(child) -> str:
+    result = []
+    for i, text in enumerate(child.contents):
+        x = parse(text)
+        s = str(x).strip()
+        result.append(s)
+    return " ".join(result).strip()
+
+
+def parse_list(root: TexNode) -> list[TexNode | str]:
+    result: list[TexNode | str] = list()
     for child in root.children:
+        root.find("note")
         if child.name == "itemize":
             result.append(UnorderedList(parse_list(child)))
         elif child.name == "item":
-            result.append("".join([parse(text).rstrip() for text in child.text]))
+            result.append(_parse_item(child))
     return result
 
 
@@ -50,17 +64,22 @@ def parse_math(root):
 
 def parse_simple(root):
     contents = list()
+    if isinstance(root, str):
+        return root
     for child in root.contents:
         if hasattr(child, "name"):
             if child.name == "textit":
                 contents.append(f"_{str(child.args[0].string)}_")
             elif child.name == "$":
-                contents.append(child.string)
+                contents.append(parse_math(child))
             else:
                 contents.append(str(child))
         else:
             contents.append(child)
-    return contents
+    return " ".join(contents)
+
+
+parse_line = parse_simple
 
 
 def parse_centering(root):
@@ -78,6 +97,8 @@ def parse_texnode(root):
         return UnorderedList(parse_list(root))
     elif root.name == "enumerate":
         return OrderedList(parse_list(root))
+    elif root.name == "item":
+        return parse_line(root)
     elif root.name == "includegraphics":
         previous_image = parse_include_graphics(root)
         return previous_image
@@ -100,15 +121,24 @@ def parse_texnode(root):
         return root
 
 
-def parse_column(root):
+def parse_column_width(root) -> tuple[float, int]:
     assert root.name == "column"
-    idx = root.args[0].string.find("\\textwidth")
     skip = 0
-    if idx != -1:
-        width_str = root.args[0].string[:idx]
-        width = float(width_str)
-        width_pct = width * 100
-        skip = 2
+    for cmd in ["\\textwidth", "\\linewidth"]:
+        # Not going to worry about translating different commands exactly right
+        idx = root.args[0].string.find(cmd)
+        if idx != -1:
+            width_str = root.args[0].string[:idx]
+            width = float(width_str)
+            width_pct = width * 100
+            skip = 2
+            break
+    return width_pct, skip
+
+
+def parse_column_env(root):
+    assert root.name == "column"
+    width_pct, skip = parse_column_width(root)
     contents = list()
     for i, content in enumerate(root.contents):
         if i < skip:
@@ -120,16 +150,48 @@ def parse_column(root):
     return Column(width_pct, contents, skip)
 
 
+def slurp_column(col: TexCmd, start: int, contents) -> tuple[int, Column]:
+    contents = list()
+    idx = start
+    width_pct, skip = parse_column_width(col)
+    while idx < len(contents) - start:
+        next = contents[idx]
+        if isinstance(next, TexNode) and next.name == "column":
+            break
+        contents.append(parse(contents[idx]))
+        idx += 1
+    return (idx - start, Column(width_pct, contents, skip))
+
+
 def parse_columns(root):
     columns: list[Column] = []
-    for child in root.children:
-        columns.append(parse_column(child))
+    skip = 0
+    if len(root.args) > 0:
+        assert len(root.args) == 1
+        assert root.args[0] == "[t]", f"it was actually {root.args[0]}"
+        skip = 1
+    for i in range(len(root.contents)):
+        child = root.contents[i]
+        if skip > 0:
+            skip -= 1
+            continue
+        if isinstance(child, TexNode):
+            if child.name == "column":
+                if isinstance(child.expr, TexEnv):
+                    columns.append(parse_column_env(child))
+                elif isinstance(child.expr, TexCmd) and child.name == "column":
+                    skip, col = slurp_column(child, i + 1, root.contents)
+                    columns.append(col)
+                    continue
+        else:
+            raise RuntimeError("wat")
+
     return Columns(columns)
 
 
 def parse_block(root):
     block_title_expr = root.args[0]
-    title = " ".join(parse_simple(block_title_expr))
+    title = parse_simple(block_title_expr)
     skip = len(list(block_title_expr.contents))
     contents = list()
     for i, content in enumerate(root.contents):
@@ -174,4 +236,4 @@ def parse(root):
     if hasattr(root, "name"):
         return parse_texnode(root)
     else:
-        return root
+        return str(root)

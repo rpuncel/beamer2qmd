@@ -2,6 +2,7 @@ import os
 from dataclasses import dataclass
 from typing import TypedDict
 
+import rich_click as click
 import yaml
 from TexSoup import TexSoup
 from TexSoup.data import TexCmd, TexExpr, TexNode
@@ -71,21 +72,22 @@ def convert_doc(doc):
     return slideshow
 
 
-def open_tex():
+def open_tex(input_file):
     # Read the LaTeX file
-    with open(input_file, "r") as file:
-        tex_content = file.read()
+    tex_content = input_file.read()
 
     # Parse the LaTeX content using text2py
     parsed_content = TexSoup(tex_content)
     return parsed_content
 
 
-def main():
+@click.command()
+@click.argument("beamer_file", type=click.File(), required=True)
+def main(beamer_file):
 
     # Start writing the Quarto markdown content
 
-    parsed_content = open_tex()
+    parsed_content = open_tex(beamer_file)
     doc = parsed_content
     metadata = get_doc_metadata(doc)
     qmd_content = "---\ntitle: 'Unit 01 Presentation'\nformat: revealjs\n---\n\n"

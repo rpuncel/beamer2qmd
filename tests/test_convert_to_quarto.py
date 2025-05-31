@@ -25,7 +25,6 @@ def test_parse_slide_notes_only():
     soup = TexSoup(tex)
     expect = """## First Models
 
-
 ::: {.notes}
 - They will be brittle - with no flexibility to make them look like the real world
 - Actually, just like this tower of legos, they may be very rectangle.
@@ -52,11 +51,10 @@ def test_parse_slide_single_figure(figure_png):
     """
     soup = TexSoup(tex)
     expect = """## First Models
+
 ![](figures/figure.png)
 
-
  Image: Hans Schou (CC BY-SA 3.0)
-
 
 ::: {.notes}
 - When we start out, our models are not going to resemble the world at all
