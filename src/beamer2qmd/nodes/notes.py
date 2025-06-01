@@ -7,4 +7,4 @@ class Notes:
             return ""
         bullets = [f"- {item}" for item in self.items]
 
-        return "\n".join(["::: {.notes}", *bullets, ":::", ""])
+        return "\n".join(["::: {.notes}\n", *bullets, ":::", ""])

@@ -13,7 +13,7 @@ class Column:
     def to_md(self):
         width_specifier = f'width="{self.width:g}%"' if self.width is not None else ""
         lines = []
-        lines.append(f"::: {{.column {width_specifier}}}\n")
+        lines.append(f"\n::: {{.column {width_specifier}}}\n\n")
         for line in self.contents:
             lines.append(str(line).rstrip().replace(r"\\", "\n"))
         lines.append("\n:::\n")

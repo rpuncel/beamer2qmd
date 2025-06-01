@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import TypedDict
 
 import rich_click as click
@@ -81,62 +82,36 @@ def open_tex(input_file):
     return parsed_content
 
 
-@click.command()
-@click.argument("beamer_file", type=click.File(), required=True)
-def main(beamer_file):
-
-    # Start writing the Quarto markdown content
-
-    parsed_content = open_tex(beamer_file)
-    doc = parsed_content
-    metadata = get_doc_metadata(doc)
-    qmd_content = "---\ntitle: 'Unit 01 Presentation'\nformat: revealjs\n---\n\n"
-    qmd_content = convert_doc(parsed_content).to_md()
-
-    # Write the Quarto markdown file
-    with open(output_file, "w") as file:
+def write_qmd(qmd_content, metadata, output_path):
+    with open(output_path, "w") as file:
         file.write("---\n")
         yaml.dump(metadata, file)
         file.write("---\n\n")
         file.write(qmd_content)
 
 
-def parse_orig(parse_content):
+def inpath_to_output(path):
+    inpath = Path(path)
+    return inpath.with_suffix(".qmd")
 
-    # Process each parsed element
-    for element in parsed_content:
-        if element["type"] == "frame":
-            frame_content = element["content"]
 
-            # Extract notes
-            notes = [note["content"] for note in element.get("notes", [])]
+@click.command()
+@click.argument("beamer_file", type=click.File(), required=True)
+def main(beamer_file):
 
-            # Extract images and check their existence
-            for image in element.get("images", []):
-                image_path = find_image_file(image["path"])
-                if image_path:
-                    frame_content = frame_content.replace(
-                        image["raw"], f"![]({image_path})"
-                    )
-                else:
-                    frame_content = frame_content.replace(image["raw"], "")
+    # Start writing the Quarto markdown content
+    parsed_content = open_tex(beamer_file)
+    doc = parsed_content
+    metadata = get_doc_metadata(doc)
+    qmd_content = convert_doc(parsed_content).to_md()
 
-            # Replace LaTeX-specific syntax with Markdown/Quarto syntax
-            frame_content = frame_content.replace(
-                "\\", ""
-            )  # Remove remaining LaTeX backslashes
+    outpath = inpath_to_output(beamer_file.name)
 
-            # Add slide content
-            qmd_content += "---\n\n"  # Slide separator
-            qmd_content += frame_content + "\n\n"
-
-            # Add notes if present
-            if notes:
-                qmd_content += "::: {.notes}\n"
-                for note in notes:
-                    qmd_content += f"- {note.strip()}\n"
-                qmd_content += ":::\n\n"
+    # Write the Quarto markdown file
+    write_qmd(qmd_content, metadata, outpath)
+    print(f"wrote out {outpath}")
 
 
 if __name__ == "__main__":
+
     main()

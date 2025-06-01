@@ -7,9 +7,13 @@ class Block:
         content = [str(c) for c in self.content]
         return "\n".join(
             [
-                f'::: {{.callout-note title="{self.title}"}}',
+                "",
+                f'::: {{.callout-note title="{self.title.strip()}"}}',
+                "",
                 "".join(content),
                 ":::",
+                "",
+                "",
             ]
         )
 

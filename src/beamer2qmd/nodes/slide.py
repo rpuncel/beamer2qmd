@@ -14,7 +14,9 @@ class Slide:
             [
                 f"## {self.title}",
                 "\n".join([str(x) for x in self.contents]),
+                "\n",
                 self.notes.to_md(),
+                "\n",
             ]
         )
 

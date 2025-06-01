@@ -9,7 +9,7 @@ class Columns:
 
     def to_md(self):
         content = "\n".join(c.to_md() for c in self.columns)
-        return "\n".join([":::: {.columns}\n", content, "::::"])
+        return "\n".join(["", ":::: {.columns}\n", content, "::::", ""])
 
     def __str__(self):
         return self.to_md()

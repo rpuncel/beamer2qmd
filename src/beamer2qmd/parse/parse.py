@@ -21,7 +21,6 @@ def _parse_item(child) -> str:
 def parse_list(root: TexNode) -> list[TexNode | str]:
     result: list[TexNode | str] = list()
     for child in root.children:
-        root.find("note")
         if child.name == "itemize":
             result.append(UnorderedList(parse_list(child)))
         elif child.name == "item":
@@ -92,6 +91,11 @@ def parse_centering(root):
     return Centering(contents)
 
 
+ignore_these = {
+    "vspace": 0,
+}
+
+
 def parse_texnode(root):
     if root.name == "itemize":
         return UnorderedList(parse_list(root))
@@ -104,6 +108,8 @@ def parse_texnode(root):
         return previous_image
     elif root.name == "textit":
         return f"_{str(root.args[0].string)}_"
+    elif root.name == "textbf":
+        return f"__{str(root.args[0].string)}__"
     elif root.name == "block":
         return parse_block(root)
     elif root.name == "columns":
@@ -112,11 +118,19 @@ def parse_texnode(root):
         return parse_math(root)
     elif root.name in ["\\"]:
         return root
-    elif root.name == "center":
+    elif root.name in ["center", "centering"]:
         return parse_centering(root)
     elif root.name in ["footnotesize"]:
         return ""
-
+    elif root.name == "BraceGroup":
+        if len(root.contents) > 0:
+            return parse(root.contents[0])
+    elif root.name in ["paul"]:
+        print("paul")
+        return root.string
+    elif root.name in ignore_these:
+        ignore_these[root.name] += 1
+        return ""
     else:
         return root
 
@@ -124,6 +138,7 @@ def parse_texnode(root):
 def parse_column_width(root) -> tuple[float, int]:
     assert root.name == "column"
     skip = 0
+    width_pct = 100.0
     for cmd in ["\\textwidth", "\\linewidth"]:
         # Not going to worry about translating different commands exactly right
         idx = root.args[0].string.find(cmd)
@@ -151,16 +166,16 @@ def parse_column_env(root):
 
 
 def slurp_column(col: TexCmd, start: int, contents) -> tuple[int, Column]:
-    contents = list()
+    ret_contents = list()
     idx = start
     width_pct, skip = parse_column_width(col)
-    while idx < len(contents) - start:
+    while idx < len(contents):
         next = contents[idx]
         if isinstance(next, TexNode) and next.name == "column":
             break
-        contents.append(parse(contents[idx]))
+        ret_contents.append(parse(contents[idx]))
         idx += 1
-    return (idx - start, Column(width_pct, contents, skip))
+    return (idx - start, Column(width_pct, ret_contents, skip))
 
 
 def parse_columns(root):
@@ -205,6 +220,14 @@ def parse_block(root):
     return Block(title, contents)
 
 
+def parse_note(note):
+    match note.args[0]:
+        case BracketGroup():
+            return parse(note.args[1])
+        case _:
+            return parse(note.args[0])
+
+
 def parse_slide(frame_root):
     slide_title = ""
     if frame_root.frametitle is not None:
@@ -218,10 +241,12 @@ def parse_slide(frame_root):
             if child.name == "frametitle":
                 slide_title = child.string
             elif child.name == "note":
-                note_items.append(child.args[1].string)
+                note_items.append(parse_note(child))
             else:
                 contents.append(parse_texnode(child))
         else:
+            if str(child) == "t":
+                continue
             if r"\\" in str(child):
                 continue
             elif str(child).startswith("%"):
